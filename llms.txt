@@ -1,0 +1,50 @@
+# Nupsio
+
+> Nupsio est une application web française de gestion de mariages destinée aux wedding planners et organisateurs de mariage professionnels. Elle centralise le dossier complet de chaque mariage et en ouvre une partie aux mariés.
+
+- Site vitrine : https://nupsio.com/
+- Application : https://app.nupsio.com/
+- Inscription professionnels : https://app.nupsio.com/inscriptionpro
+- Inscription mariés (avec code) : https://app.nupsio.com/inscriptionclient
+- Langue : français
+- Public : wedding planners et organisateurs de mariage professionnels
+
+## Tarifs
+
+- Gratuit : 0 €, un seul événement, toutes les fonctionnalités, sans carte bancaire.
+- Pro : 29 € par mois, événements illimités, sans engagement, résiliable en un clic.
+
+## Les seize modules d'un dossier de mariage
+
+1. Les mariés : coordonnées des deux mariés, date, type et lieu de cérémonie, invités VIP, code d'accès unique par marié.
+2. Invités & RSVP : statut (confirmé, en attente, décliné), type (adulte, enfant, bébé), contact, allergies et notes, totaux recalculés automatiquement.
+3. Plan de table : tables nommées avec capacité, affectation des invités, colonne des invités non assignés, icônes adulte/enfant/bébé et notes d'allergies.
+4. Budget & dépenses : budget total, postes alloués, dépenses payées, à venir ou en retard, reste disponible et pourcentage engagé.
+5. Contrats & devis : contrat vierge et contrat signé par prestataire, montant, statut de signature, montant total signé.
+6. Tâches & rétroplanning : échéances classées en retard, aujourd'hui, à venir et terminées.
+7. Livrables : documents dus au client, avec format, date prévue et statut.
+8. Planning du jour J : déroulé heure par heure avec lieu, sur un ou plusieurs jours.
+9. Univers & moodboards : style, ambiance, notes de design, palette de couleurs nommée et plusieurs tableaux d'inspiration.
+10. Déco : ensembles (cérémonie, cocktail, dîner, extérieurs) et quantités par élément.
+11. Menus & boissons : cocktail et repas, plats avec descriptif, quantités et unités.
+12. Chambres & couchages : chambres, types de lits, option lit bébé et invité nommé sur chaque place.
+13. Cérémonie : histoire du couple, trame complète, lectures et textes choisis, vœux et rituels.
+14. Playlist : moments clés avec titre associé, titres incontournables et titres à ne jamais jouer.
+15. Coiffure & maquillage : essais par personne, avec photos de référence.
+16. Le lieu & documents : espaces loués et capacités, agencement de la cuisine, normes à respecter, plans du domaine, documents et annuaire des prestataires avec appel direct.
+
+## Gestion de l'activité
+
+- CRM clients et prestataires avec suivi commercial (prospect, devis envoyé, relancé, validé, décliné).
+- Finances : entrées et sorties du mois, solde net.
+- Calendrier : rendez-vous et échéances de tous les dossiers.
+- Stock : quantités, seuils d'alerte, ruptures et fournisseurs.
+- Tableau de bord : tâches urgentes du jour et budget engagé par mariage.
+
+## Accès des mariés
+
+Le wedding planner génère un code unique pour chaque marié. Le marié crée son mot de passe et accède à son dossier : planning, budget, invités, moodboards et plans du lieu. Chacun des deux mariés dispose de son propre accès.
+
+## Évolutions
+
+Nupsio est une application récente. Les demandes d'amélioration des utilisateurs sont lues individuellement et les ajouts (champ, statut, onglet) sont mis en ligne en quelques jours, sans installation.
