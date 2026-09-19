@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Démo interactive — Nupsio</title>
+<meta name="description" content="Visite guidée de Nupsio, module par module : dossiers de mariage, budget, invités, plan de table, planning du jour J.">
+<link rel="icon" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{margin:0;background:#FFFFFF;font-family:Karla,system-ui,sans-serif;color:#12262E;}
+  a{color:#64313E;text-decoration:none;}
+  a:hover{color:#8A4A5A;}
+  @keyframes pulse{0%{transform:scale(1);opacity:.5;}70%{transform:scale(2.1);opacity:0;}100%{transform:scale(2.1);opacity:0;}}
+  @keyframes cardIn{from{opacity:0;transform:scale(.96) translateY(8px);}to{opacity:1;transform:none;}}
+  @keyframes rise{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:none;}}
+  @keyframes grow{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+  @keyframes blink{0%,100%{opacity:.35;}50%{opacity:1;}}
+  @keyframes shot{from{opacity:0;}to{opacity:1;}}
+  .btn{padding:10px 18px;border-radius:999px;font-family:Karla,sans-serif;font-size:13px;cursor:pointer;white-space:nowrap;border:1px solid #DCE2E5;background:rgba(255,255,255,.94);color:#5C6E76;}
+  .btn:hover{background:#F2F5F7;color:#12262E;}
+  .btn-p{border-color:#64313E;background:#64313E;color:#FFFFFF;font-weight:600;}
+  .btn-p:hover{background:#7C3D4C;color:#FFFFFF;}
+  .dot{position:absolute;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;border:2px solid #FFFFFF;background:rgba(18,38,46,.9);color:#FFFFFF;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 4px 12px rgba(30,20,10,.3);transition:background .7s cubic-bezier(.22,.61,.36,1),opacity .7s cubic-bezier(.22,.61,.36,1);}
+  .dot.on{background:#64313E;z-index:4;}
+  .ring{position:absolute;inset:0;border-radius:50%;background:#64313E;animation:pulse 2.4s ease-out infinite;z-index:1;}
+  @media(max-width:700px){.wrap{padding:10px !important;}}
+</style>
+</head>
+<body>
+<div class="wrap" style="height:100%;padding:16px 20px;display:flex;align-items:center;justify-content:center;">
+  <div id="stage" style="position:relative;width:100%;max-width:calc((100vh - 32px) * 1904 / 992);aspect-ratio:1904 / 992;max-height:calc(100vh - 32px);border-radius:16px;overflow:hidden;background:#FFFFFF;border:1px solid #DCE2E5;box-shadow:0 24px 54px rgba(18,38,46,.14);">
+    <div id="shot" style="position:absolute;inset:0;background-size:100% 100%;background-repeat:no-repeat;transform-origin:50% 50%;transition:transform 1.1s cubic-bezier(.22,.61,.36,1);"></div>
+    <div id="dots"></div>
+    <div id="card" style="display:none;"></div>
+    <div id="cover" style="position:absolute;inset:0;z-index:6;background:#FFFFFF;display:flex;align-items:center;padding:clamp(28px,5vw,72px);transition:opacity .85s cubic-bezier(.22,.61,.36,1),transform .85s cubic-bezier(.22,.61,.36,1);"></div>
+    <div id="intro" style="position:absolute;inset:0;z-index:7;background:#FFFFFF;display:flex;align-items:center;justify-content:center;padding:clamp(28px,5vw,72px);transition:opacity .9s cubic-bezier(.22,.61,.36,1);">
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center;max-width:820px;">
+        <img src="assets/nupsio-logo.png" alt="Nupsio" style="height:clamp(34px,4.2vw,58px);width:auto;animation:rise 1s cubic-bezier(.22,.61,.36,1) .15s both;">
+        <div style="width:clamp(90px,10vw,140px);height:2px;background:#64313E;margin:clamp(22px,3vw,40px) 0;transform-origin:center;animation:grow .9s cubic-bezier(.22,.61,.36,1) .5s both;"></div>
+        <h1 style="font-family:Marcellus,serif;font-size:clamp(28px,4.6vw,66px);line-height:1.08;margin:0 0 20px;animation:rise 1s cubic-bezier(.22,.61,.36,1) .85s both;">Gérer tout un mariage<br>au même endroit</h1>
+        <p style="margin:0 0 30px;font-size:clamp(14px,1.5vw,20px);line-height:1.6;color:#5C6E76;max-width:620px;animation:rise 1s cubic-bezier(.22,.61,.36,1) 1.15s both;">Démonstration complète de l'application, module par module, du carnet d'adresses au déroulé du jour J.</p>
+        <span style="font-size:11px;letter-spacing:2.4px;text-transform:uppercase;color:#6B7780;animation:blink 2.4s ease-in-out 1.8s infinite both;">Cliquez sur suivant pour commencer</span>
+      </div>
+    </div>
+    <div style="position:absolute;z-index:9;bottom:18px;right:18px;display:flex;align-items:center;gap:10px;">
+      <span id="counter" style="padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.92);border:1px solid #DCE2E5;font-size:11.5px;color:#5C6E76;white-space:nowrap;"></span>
+      <button class="btn" onclick="step(-1)">&#8592; Retour</button>
+      <button class="btn btn-p" onclick="step(1)">Suivant &#8594;</button>
+    </div>
+  </div>
+</div>
+<script>
+const M = [
+  {id:"dashboard", group:"app", tab:"Accueil", title:"Tableau de bord",
+   intro:"Le point d'entrée : ce qui doit être fait aujourd'hui, les rendez-vous qui arrivent et l'état de chaque mariage en cours.",
+   img:"demo-img/dashboard.png",
+   h:[
+    {x:47.6,y:4,t:"Six espaces pour piloter votre entreprise",d:"Accueil, Dossier, CRM, Calendrier, Finances et Stock : ces six espaces couvrent de la prospection commerciale au suivi du matériel, en passant par la comptabilité et les mariages eux-mêmes."},
+    {x:29,y:42,t:"Les tâches urgentes, tous dossiers confondus",d:"Les échéances du jour remontent ici, quel que soit le mariage concerné : chaque ligne rappelle le couple auquel elle appartient."},
+    {x:78,y:42,t:"Les rendez-vous à venir",d:"Réunions de préparation, dégustations, visites techniques et échéances apparaissent côte à côte."},
+    {x:50,y:81,t:"Vos dossiers en cours",d:"Chaque mariage est une carte avec sa date, son lieu et sa barre budget. D'un coup d'œil on voit lequel avance bien et lequel demande une vigilance particulière."}
+   ]},
+  {id:"crm", group:"app", tab:"CRM", title:"CRM",
+   intro:"Le carnet d'adresses de l'agence : les couples qui vous contactent d'un côté, les prestataires avec qui vous travaillez de l'autre.",
+   img:"demo-img/crm.png",
+   h:[
+    {x:9,y:18,t:"Clients et prestataires au même endroit",d:"Un seul répertoire, filtrable en un clic. Les prospects qui vous écrivent et les traiteurs avec qui vous travaillez depuis cinq ans cohabitent sans que vous ayez à tenir deux fichiers séparés."},
+    {x:41,y:58,t:"Le suivi commercial de chaque client",d:"Prospect, devis envoyé, relancé, validé, décliné : le statut se change d'un clic."},
+    {x:52,y:45,t:"Une note par contact",d:"Le détail dont on se souvient rarement six mois plus tard : la remarque du rendez-vous, le budget évoqué, la contrainte de famille. La note reste attachée au contact plutôt qu'à un carnet."}
+   ]},
+  {id:"calendrier", group:"app", tab:"Calendrier", title:"Calendrier",
+   intro:"Tous les rendez-vous et toutes les échéances de l'agence, groupés par mois, tous mariages confondus.",
+   img:"demo-img/calendrier.png",
+   h:[
+    {x:6,y:17,t:"Un agenda groupé par mois",d:"Les échéances se lisent en continu. Pas de grille mensuelle à naviguer : ce qui compte, c'est la prochaine échéance."},
+    {x:30,y:24,t:"Le contexte de chaque événement",d:"Chaque ligne porte son intitulé et le couple ou le prestataire concerné."},
+    {x:86,y:11,t:"Remonter dans le temps",d:"Les mois passés sont masqués par défaut pour ne garder que ce qui arrive. Un bouton les rouvre quand il faut retrouver la date d'une réunion déjà tenue."}
+   ]},
+
+  {id:"d-dashboard", group:"dossier", tab:"Vue d'ensemble", title:"Dossier · Vue d'ensemble",
+   intro:"L'écran d'accueil d'un mariage : les chiffres clés, le devis de votre prestation, les prestataires et le déroulé du jour J.",
+   img:"demo-img/d-dashboard.png",
+   h:[
+    {x:3.8,y:50,t:"Le menu vertical du dossier",d:"Vingt et un modules accessibles rapidement : mariés, moodboard, tâches, livrables, budget, contrats, lieu, invités, plan de table, menus et plus encore."},
+    {x:50,y:37,t:"Votre devis de prestation",d:"Le récapitulatif de ce que vous facturez, ligne par ligne, avec quantité et prix unitaire. Le total se met à jour tout seul et reste séparé du budget du mariage."},
+    {x:30,y:78,t:"Les prestataires du mariage",d:"La liste des intervenants avec leur numéro directement accessible."},
+    {x:76,y:78,t:"Un aperçu du planning",d:"Les premières étapes du planning apparaissent dès la page d'accueil du dossier."}
+   ]},
+  {id:"d-general", group:"dossier", tab:"Général", title:"Dossier · Général",
+   intro:"Les informations de base du mariage, et surtout le code qui permet aux mariés de rejoindre le projet.",
+   img:"demo-img/d-general.png",
+   h:[
+    {x:50,y:25,t:"Les deux mariés, avec leurs coordonnées",d:"Nom, prénom, téléphone et email de chacun."},
+    {x:36,y:36.5,t:"Le code qui ouvre le dossier aux mariés",d:"Vous générez un code et vous le transmettez : les mariés créent leur compte et rejoignent le projet. Ils accèdent alors au dossier complet et peuvent avancer avec vous plutôt que par échanges de fichiers."},
+    {x:50,y:83,t:"Les invités VIP et leur rôle",d:"Parents, témoins, demoiselle d’honneur : on retrouve rapidement les invités importants."}
+   ]},
+  {id:"d-moodboard", group:"dossier", tab:"Moodboard", title:"Dossier · Moodboard",
+   intro:"L'univers visuel du mariage : style, ambiance, palette de couleurs et images d'inspiration.",
+   img:"demo-img/d-moodboard.png",
+   h:[
+    {x:40,y:30,t:"Toutes les informations du visuel du mariage",d:"Style, ambiance, notes de design et palette de couleurs : on réunit ici tout ce qui définit l'univers visuel du mariage."},
+    {x:40,y:70,t:"Les images d'inspiration",d:"Les visuels collectés au fil des rendez-vous sont rassemblés ici, et les mariés peuvent en ajouter eux-mêmes."},
+    {x:53,y:86,t:"Plusieurs tableaux par mariage",d:"Un tableau pour la cérémonie, un pour la réception, un pour la papeterie. Chaque ambiance a son espace au lieu d'être mélangée dans une même planche."}
+   ]},
+  {id:"d-taches", group:"dossier", tab:"Tâches", title:"Dossier · Tâches",
+   intro:"La to-do list du mariage, filtrée par échéance, avec un statut qui se calcule tout seul.",
+   img:"demo-img/d-taches.png",
+   h:[
+    {x:20,y:19,t:"Cinq filtres pour trier l'urgence",d:"Tous, en retard, aujourd'hui, à venir, terminées."},
+    {x:30,y:30,t:"Une tâche, une ligne",d:"L'intitulé est écrit en clair, la case se coche d'un clic et la ligne se barre. Les tâches terminées descendent en bas de liste sans disparaître de l'historique."},
+    {x:86,y:40,t:"Un statut calculé sur la date",d:"En retard, aujourd'hui, à venir, terminée : le badge se met à jour tout seul à partir de l'échéance. Vous ne maintenez pas une colonne de statut à la main."}
+   ]},
+  {id:"d-livrables", group:"dossier", tab:"Livrables", title:"Dossier · Livrables",
+   intro:"Ce que vous vous êtes engagée à remettre aux mariés, avec sa date et son état d'avancement.",
+   img:"demo-img/d-livrables.png",
+   h:[
+    {x:17,y:19,t:"Le suivi de vos engagements",d:"Rétroplanning, budget prévisionnel, plan de salle, checklist administrative : tout ce que vous livrez est listé."},
+    {x:70,y:33,t:"Suivez l'avancement de chaque livrable",d:"Intitulé, format, date de remise et statut : vous suivez où en est chaque document que vous devez remettre à vos clients. Cet espace vous est réservé, les mariés n'y ont pas accès."}
+   ]},
+  {id:"d-budget", group:"dossier", tab:"Budget", title:"Dossier · Budget",
+   intro:"L'enveloppe du mariage par poste, et le détail de chaque dépense avec son état de paiement.",
+   img:"demo-img/d-budget.png",
+   h:[
+    {x:50,y:14,t:"L'état du budget en quatre chiffres",d:"Pourcentage engagé, total engagé, budget total et reste disponible."},
+    {x:50,y:40,t:"Le budget poste par poste",d:"Traiteur, lieu, photographe, décoration… : chaque catégorie affiche le budget engagé par rapport au budget alloué."},
+    {x:94,y:24,t:"Des postes adaptables",d:"Les catégories et leurs montants s’adaptent individuellement pour chaque mariage. Vous pouvez ajouter autant de catégorie que vous le souhaitez."},
+    {x:17,y:76,t:"Les dépenses filtrées par état",d:"À venir, payées, en retard."},
+    {x:55,y:87,t:"Chaque dépense rattachée à un poste",d:"Chaque dépense est relié à sa catégorie, sa date et son montant, et alimente automatiquement la barre du poste correspondant."}
+   ]},
+  {id:"d-contrats", group:"dossier", tab:"Contrats", title:"Dossier · Contrats",
+   intro:"Les contrats prestataires du mariage, du document vierge au document signé.",
+   img:"demo-img/d-contrats.png",
+   h:[
+    {x:50,y:14,t:"Où en sont les signatures",d:"Nombre de contrats signés, nombre en attente, montant total engagé."},
+    {x:40,y:30,t:"Un contrat par prestataire",d:"Le nom, le montant et la catégorie sont visibles sans ouvrir le document."},
+    {x:92,y:30,t:"Trois états possibles",d:"En attente du contrat, en attente de signature, contrat signé. Vous savez précisément à quelle étape relancer et qui relancer."},
+    {x:22,y:65,t:"Contrat vierge et contrat signé",d:"On dépose le document envoyé, puis la version signée en retour. Les deux restent stockés côte à côte dans le dossier, consultables à tout moment."}
+   ]},
+  {id:"d-lieu", group:"dossier", tab:"Lieu", title:"Dossier · Lieu de réception",
+   intro:"La fiche technique complète du lieu.",
+   img:"demo-img/d-lieu.png",
+   h:[
+    {x:50,y:21,t:"Identité et capacité du lieu",d:"Nom, adresse, capacité debout et capacité assis."},
+    {x:50,y:44,t:"Les informations logistiques",d:"Nombre de chambres, couchages, horaire de fin de sonorisation, remise et restitution des clés, accès parking."},
+    {x:50,y:72,t:"Les espaces loués et leur usage",d:"Grande salle, terrasse, cour intérieure, orangerie : chaque espace a sa capacité et son usage prévu pour mieux exploiter les espaces du mariages"},
+    {x:50,y:94,t:"L'agencement de la cuisine",d:"Équipements, surface, accès livraison, quai de déchargement : toute les informations que le traiteur a besoin."}
+   ]},
+  {id:"d-lieu-plan", group:"dossier", tab:"Plans du lieu", title:"Dossier · Plans du lieu",
+   intro:"Les plans et photos du domaine, légendés par usage.",
+   img:"demo-img/d-lieu-plan.png",
+   h:[
+    {x:32,y:28,t:"Des visuels légendés",d:"Plan de salle, spot photo couple, emplacement du cocktail, vue aérienne… Le repérage fait une fois sur place reste accessible à toute l'équipe."}
+   ]},
+  {id:"d-lieu-couchages", group:"dossier", tab:"Chambres du lieu", title:"Dossier · Chambres du lieu",
+   intro:"L'inventaire des chambres et des lits disponibles sur place.",
+   img:"demo-img/d-lieu-couchages.png",
+   h:[
+    {x:23,y:48,t:"Le détail des lits",d:"Lit double, king size, simple, superposé, avec leur nombre de couchages."},
+    {x:14,y:22,t:"L'option lit bébé",d:"Les chambres pouvant accueillir un lit bébé sont marquées."},
+    {x:47,y:77,t:"Les dortoirs aussi",d:"Rien n'oblige à ne penser qu'en chambres doubles."}
+   ]},
+  {id:"d-invites", group:"dossier", tab:"Invités", title:"Dossier · Invités",
+   intro:"La liste complète des invités, leurs réponses, leurs allergies et leurs coordonnées.",
+   img:"demo-img/d-invites.png",
+   h:[
+    {x:41,y:47,t:"Le statut de réponse",d:"Confirmé, en attente, décliné : un menu déroulant par invité. Les mariés peuvent le mettre à jour eux-mêmes au fil des retours qu'ils reçoivent."},
+    {x:50,y:55,t:"Adulte, enfant ou bébé",d:"Le type conditionne le repas, le placement et le couchage."},
+    {x:79,y:47,t:"Allergies et notes",d:"Régimes, intolérances, contraintes de placement : la colonne suit l'invité partout. Le jour de la transmission au traiteur, tout est déjà consigné."}
+   ]},
+  {id:"d-plan-table", group:"dossier", tab:"Plan de table", title:"Dossier · Plan de table",
+   intro:"La répartition des invités par table, construite à partir de la liste déjà saisie.",
+   img:"demo-img/d-plan-table.png",
+   h:[
+    {x:18,y:38,t:"Une carte par table",d:"Table d'honneur, table 1, table 2 : chacune porte son nom et son nombre de places. On crée autant de tables que le lieu en permet."},
+    {x:40,y:54,t:"Les invités viennent de la liste",d:"On pioche dans les invités confirmés déjà saisis plutôt que de retaper des noms. Un invité ne peut pas être placé à deux tables à la fois."},
+    {x:83,y:40,t:"La colonne des non assignés",d:"Tous ceux qui n'ont pas encore de place restent visibles."}
+   ]},
+  {id:"d-menu", group:"dossier", tab:"Menus", title:"Dossier · Menu",
+   intro:"Le cocktail, le dîner et les boissons, détaillés plat par plat avec les quantités.",
+   img:"demo-img/d-menu.png",
+   h:[
+    {x:20,y:30,t:"Un menu par service",d:"Cocktail, dîner, brunch du lendemain : chaque moment a sa carte."},
+    {x:50,y:14,t:"Toujours le nombre d'invités sous les yeux",d:"Les compteurs restent affichés pendant qu'on saisit les quantités."}
+   ]},
+  {id:"d-couchages", group:"dossier", tab:"Couchages", title:"Dossier · Couchages",
+   intro:"Qui dort où : l'affectation nominative des invités dans les chambres du lieu.",
+   img:"demo-img/d-couchages.png",
+   h:[
+    {x:17,y:20,t:"Les chambres reprises automatiquement",d:"Les chambres décrites dans la fiche du lieu réapparaissent ici, avec leurs lits. Vous ne ressaisissez rien, vous attribuez."},
+    {x:39,y:26,t:"Un nom par couchage",d:"Chaque lit reçoit le nom d'un invité."},
+    {x:24,y:13,t:"Ajouter un lit bébé",d:"Le lit bébé s'ajoute à la chambre où il est nécessaire."}
+   ]},
+  {id:"d-beaute", group:"dossier", tab:"Beauté", title:"Dossier · Beauté",
+   intro:"Coiffure et maquillage : les souhaits de chaque personne, avec leurs photos de référence.",
+   img:"demo-img/d-beaute.png",
+   h:[
+    {x:12,y:20,t:"Une ligne par personne",d:"La mariée, les témoins, la mère de la mariée : chacune a son intitulé et sa demande précise."},
+    {x:24,y:36,t:"Les photos de référence",d:"Les images repérées par les mariés sont attachées à la personne concernée."}
+   ]},
+  {id:"d-ceremonie", group:"dossier", tab:"Cérémonie", title:"Dossier · Cérémonie",
+   intro:"Le contenu de la cérémonie laïque : l'histoire du couple, la trame, les lectures et les rituels.",
+   img:"demo-img/d-ceremonie.png",
+   h:[
+    {x:50,y:22,t:"L'histoire du couple",d:"La rencontre, la demande, les anecdotes qui feront sourire l'assemblée. C'est la matière première de la cérémonie, recueillie une fois et conservée dans le dossier."},
+    {x:50,y:48,t:"La trame complète",d:"Le texte de la cérémonie peut s'écrire directement dans le dossier."},
+    {x:30,y:73,t:"Les lectures et qui les porte",d:"Chaque texte est associé à la personne qui le lira. Le jour J, on sait qui appeler."},
+    {x:30,y:93,t:"Vœux et rituels",d:"Rituel du sable, échange des vœux, bénédiction des alliances : les séquences prévues sont listées e expliquées en détails."}
+   ]},
+  {id:"d-playlist", group:"dossier", tab:"Playlist", title:"Dossier · Playlist",
+   intro:"Les morceaux attendus aux moments clés, et la liste à donner au DJ.",
+   img:"demo-img/d-playlist.png",
+   h:[
+    {x:30,y:20,t:"Un morceau par moment clé",d:"Entrée du couple, première danse, lancer du bouquet, ouverture du bal, entrée du gâteau. Chaque séquence a son titre attitré."},
+    {x:30,y:75,t:"Les titres incontournables",d:"La liste des morceaux que les mariés veulent entendre dans la soirée."},
+    {x:30,y:93,t:"Les titres interdits",d:"Juste en dessous, une seconde liste recense les morceaux que les mariés ne veulent entendre sous aucun prétexte."}
+   ]},
+  {id:"d-deco", group:"dossier", tab:"Décoration", title:"Dossier · Décoration",
+   intro:"L'inventaire du matériel de décoration, groupé comme vous le souhaitez.",
+   img:"demo-img/d-deco.png",
+   h:[
+    {x:17,y:19,t:"Des ensembles par séquence",d:"Cérémonie, cocktail, dîner, extérieurs : le matériel est regroupé là où il sera installé. "},
+    {x:94,y:11.5,t:"Créer un nouvel ensemble",d:"Un espace supplémentaire, un photobooth, un brunch du lendemain : on ajoute un ensemble d’un seul clic."}
+   ]},
+  {id:"d-planning", group:"dossier", tab:"Planning jour J", title:"Dossier · Planning du jour J",
+   intro:"Le déroulé heure par heure.",
+   img:"demo-img/d-planning.png",
+   h:[
+    {x:9.8,y:30,t:"Une timeline à l'heure près",d:"De huit heures du matin à la nuit, chaque étape a son horaire."},
+    {x:78,y:54,t:"Le lieu de chaque étape",d:"Cuisine, cour intérieure, chambre Chardonnay, terrasse, grande salle : personne ne cherche où se rendre."},
+    {x:11,y:92,t:"Le lendemain compte aussi",d:"La soirée déborde sur le jour suivant et le planning le suit."}
+   ]},
+  {id:"d-annuaire", group:"dossier", tab:"Annuaire", title:"Dossier · Annuaire prestataires",
+   intro:"Les coordonnées de tous les prestataires du mariage, rassemblées sur un seul écran.",
+   img:"demo-img/d-annuaire.png",
+   h:[
+    {x:17,y:23,t:"Une carte par prestataire",d:"Retrouvez directement les coordonnées de l'équipe complète du mariage sur un même écran."},
+   ]},
+  {id:"d-documents", group:"dossier", tab:"Documents", title:"Dossier · Documents",
+   intro:"Le classeur du mariage : plans, autorisations, attestations, tout ce qui doit être retrouvable.",
+   img:"demo-img/d-documents.png",
+   h:[
+    {x:30,y:19.5,t:"Un classeur par mariage",d:"Plan du domaine, autorisation de tournage drone, attestation d'assurance responsabilité civile. Les pièces administratives cessent d'être éparpillées entre boîte mail et disque dur."},
+    {x:95,y:19.5,t:"Téléchargeable à tout moment",d:"Chaque document se récupère en un clic."},
+    {x:93,y:11.5,t:"Ajouter un document",d:"Tout fichier utile au mariage se dépose ici, et les mariés y ont accès comme vous. Ils peuvent également charger des documents pour vous les partager."}
+   ]}
+];
+
+var st = {m:0, hs:-2, intro:true};
+var shot=document.getElementById('shot'), dots=document.getElementById('dots'),
+    card=document.getElementById('card'), cover=document.getElementById('cover'),
+    intro=document.getElementById('intro'), counter=document.getElementById('counter');
+M.forEach(function(m){ var i=new Image(); i.src=m.img; });
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+function render(){
+  var mod=M[st.m], hs=st.hs, a=(hs>=0?mod.h[hs]:null);
+
+  intro.style.opacity = st.intro?'1':'0';
+  intro.style.visibility = st.intro?'visible':'hidden';
+  intro.style.pointerEvents='none';
+
+  var onCover = (hs===-2);
+  cover.style.opacity = onCover?'1':'0';
+  cover.style.visibility = onCover?'visible':'hidden';
+  cover.style.transform = onCover?'none':'translateY(-14px)';
+  cover.style.pointerEvents='none';
+  cover.innerHTML='<div style="max-width:720px;">'+
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">'+
+    '<span style="font-family:Marcellus,serif;font-size:17px;color:#FFF;background:#64313E;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;">'+String(st.m+1).padStart(2,'0')+'</span>'+
+    '<span style="font-size:10.5px;letter-spacing:2.2px;text-transform:uppercase;color:#6B7780;">'+(mod.group==='app'?'Application':'Dossier mariage')+'</span></div>'+
+    '<h2 style="font-family:Marcellus,serif;font-size:clamp(26px,3.6vw,52px);line-height:1.1;margin:0 0 18px;">'+esc(mod.title)+'</h2>'+
+    '<p style="margin:0;font-size:clamp(14px,1.4vw,19px);line-height:1.6;color:#5C6E76;">'+esc(mod.intro)+'</p>'+
+    '<div style="height:1px;background:#DCE2E5;margin:28px 0 0;max-width:200px;"></div></div>';
+
+  shot.style.backgroundImage="url('"+mod.img+"')";
+  shot.style.animation='shot .85s cubic-bezier(.22,.61,.36,1) both';
+  var z=1.12;
+  if(a){
+    var lim=50-50/z, cl=function(v){return Math.max(-lim,Math.min(lim,v));};
+    shot.style.transform='scale('+z+') translate('+cl((a.x-50)/z+50-a.x).toFixed(2)+'%,'+cl((a.y-50)/z+50-a.y).toFixed(2)+'%)';
+  } else { shot.style.transform='scale(1)'; }
+
+  dots.innerHTML = mod.h.map(function(h,i){
+    var on=(i===hs);
+    return '<button class="dot'+(on?' on':'')+'" style="left:'+h.x+'%;top:'+h.y+'%;opacity:'+(a&&!on?'.38':'1')+'" onclick="pick('+i+')">'+
+      ((on||!a)?'<span class="ring"></span>':'')+'<span style="position:relative;z-index:2;">'+(i+1)+'</span></button>';
+  }).join('');
+
+  if(a){
+    var w=Math.min(320, Math.round(document.getElementById('stage').clientWidth*0.42));
+    var hz = a.x<=50 ? 'left:calc('+a.x+'% + 26px);max-width:calc('+(100-a.x)+'% - 34px);'
+                     : 'right:calc('+(100-a.x)+'% + 26px);max-width:calc('+a.x+'% - 34px);';
+    var vt = a.y<=50 ? 'top:calc('+a.y+'% - 16px);max-height:calc('+(100-a.y)+'% - 2px);'
+                     : 'bottom:calc('+(100-a.y)+'% - 16px);max-height:calc('+a.y+'% - 2px);';
+    card.style.cssText='position:absolute;z-index:5;'+hz+vt+'width:'+w+'px;overflow-y:auto;background:#FFF;border:1px solid #DCE2E5;border-radius:13px;padding:18px;box-shadow:0 18px 40px rgba(18,38,46,.18);transform-origin:'+(a.x<=50?'left ':'right ')+(a.y<=50?'top':'bottom')+';animation:cardIn .85s cubic-bezier(.22,.61,.36,1) both;';
+    card.innerHTML='<div style="display:flex;align-items:center;gap:9px;margin-bottom:11px;">'+
+      '<span style="width:23px;height:23px;border-radius:50%;background:#64313E;color:#FFF;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;">'+(hs+1)+'</span>'+
+      '<span style="font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;color:#7C6B57;">'+esc(mod.title)+'</span></div>'+
+      '<h3 style="font-family:Marcellus,serif;font-size:19px;line-height:1.25;margin:0 0 9px;">'+esc(a.t)+'</h3>'+
+      '<p style="margin:0;font-size:13.5px;line-height:21px;color:#5C6E76;">'+esc(a.d)+'</p>';
+  } else { card.style.display='none'; card.style.cssText='display:none;'; }
+
+  counter.textContent = st.intro ? 'Démo Nupsio' : 'Module '+(st.m+1)+'/'+M.length+' · '+(hs===-2?'introduction':hs===-1?"vue d'ensemble":'point '+(hs+1)+'/'+mod.h.length);
+}
+
+function pick(i){ st.hs = (st.hs===i ? -1 : i); render(); }
+
+function step(d){
+  if(st.intro){ if(d>0){ st.intro=false; st.m=0; st.hs=-2; render(); } return; }
+  if(d<0 && st.m===0 && st.hs===-2){ st.intro=true; render(); return; }
+  var n=st.hs+d;
+  if(n>=-2 && n<M[st.m].h.length){ st.hs=n; render(); return; }
+  var nm=(st.m+(d>0?1:-1)+M.length)%M.length;
+  st.m=nm; st.hs=(d>0?-2:M[nm].h.length-1); render();
+}
+
+window.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'||e.key===' '){ e.preventDefault(); step(1); }
+  else if(e.key==='ArrowLeft'){ e.preventDefault(); step(-1); }
+});
+window.addEventListener('resize', render);
+render();
+</script>
+</body>
+</html>
